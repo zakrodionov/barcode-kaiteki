@@ -11,20 +11,25 @@ import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.withStyledAttributes
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.DecodeHintType
 import com.google.zxing.MultiFormatReader
 import com.google.zxing.Result
 import com.kroegerama.kaiteki.bcode.*
 import com.kroegerama.kaiteki.bcode.databinding.BarcodeViewBinding
+import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 class BarcodeView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr), ResultListener {
 
-    private val executor = Executors.newFixedThreadPool(1)
+    private lateinit var executor: ExecutorService
+    private var lifecycleOwner: LifecycleOwner? = null
 
     private val binding = BarcodeViewBinding.inflate(LayoutInflater.from(context), this)
 
@@ -73,26 +78,39 @@ class BarcodeView @JvmOverloads constructor(
     }
 
     fun bindToLifecycle(owner: LifecycleOwner) {
-        val preview = Preview.Builder()
-            .build()
-        val cameraSelector = CameraSelector.Builder()
-            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-            .build()
+        if (lifecycleOwner != owner) {
+            lifecycleOwner = owner
 
-        val analysis = ImageAnalysis.Builder().apply {
-            setTargetResolution(Size(640, 480))
-            setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-        }.build().apply {
-            setAnalyzer(executor, analyzer)
+            executor = Executors.newSingleThreadExecutor()
+            val preview = Preview.Builder()
+                .build()
+            val cameraSelector = CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .build()
+
+            val analysis = ImageAnalysis.Builder().apply {
+                setTargetResolution(Size(640, 480))
+                setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            }.build().apply {
+                setAnalyzer(executor, analyzer)
+            }
+            cameraProvider.unbindAll()
+            preview.setSurfaceProvider(binding.previewView.surfaceProvider)
+            cameraProvider.bindToLifecycle(owner, cameraSelector, preview, analysis)
+
+            owner.lifecycle.addObserver(object : LifecycleObserver {
+                @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+                fun onStop() {
+                    cameraProvider.unbindAll()
+                }
+
+                @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                fun onDestroy() {
+                    executor.shutdown()
+                    owner.lifecycle.removeObserver(this)
+                }
+            })
         }
-        cameraProvider.unbindAll()
-        preview.setSurfaceProvider(binding.previewView.surfaceProvider)
-        cameraProvider.bindToLifecycle(owner, cameraSelector, preview, analysis)
-    }
-
-    fun unbind() {
-        listener = null
-        cameraProvider.unbindAll()
     }
 
     fun setFormats(formats: List<BarcodeFormat>) = barcodeReader.setHints(
