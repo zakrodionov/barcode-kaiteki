@@ -33,7 +33,7 @@ class BarcodeView @JvmOverloads constructor(
 
     var previewIsReadyListener: () -> Unit = {}
 
-    private val binding = BarcodeViewBinding.inflate(LayoutInflater.from(context), this)
+    val binding = BarcodeViewBinding.inflate(LayoutInflater.from(context), this)
 
     private val cameraProvider by lazy { ProcessCameraProvider.getInstance(context).get() }
 
