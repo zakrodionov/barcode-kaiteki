@@ -99,13 +99,9 @@ class BarcodeView @JvmOverloads constructor(
             cameraProvider.bindToLifecycle(owner, cameraSelector, preview, analysis)
 
             owner.lifecycle.addObserver(object : LifecycleObserver {
-                @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-                fun onStop() {
-                    cameraProvider.unbindAll()
-                }
-
                 @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
                 fun onDestroy() {
+                    cameraProvider.unbindAll()
                     executor.shutdown()
                     owner.lifecycle.removeObserver(this)
                 }

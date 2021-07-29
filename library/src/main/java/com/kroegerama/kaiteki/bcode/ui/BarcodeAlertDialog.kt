@@ -34,7 +34,6 @@ fun Context.showBarcodeAlertDialog(
     val handler = Handler(Looper.getMainLooper())
 
     val dlg = AlertDialog.Builder(this)
-        .setOnDismissListener { bcode.unbind() }
         .setView(view)
         .setOnCancelListener {
             listener.onBarcodeScanCancelled()

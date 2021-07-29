@@ -61,11 +61,6 @@ class BarcodeBottomSheet : BottomSheetDialogFragment(), BarcodeResultListener {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    override fun onStop() {
-        binding?.bcode?.unbind()
-        super.onStop()
-    }
-
     override fun onDestroyView() {
         binding = null
         super.onDestroyView()

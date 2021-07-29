@@ -72,11 +72,6 @@ open class BarcodeDialog : DialogFragment(), BarcodeResultListener {
         //Ignore: BarcodeView will never emit this event
     }
 
-    override fun onStop() {
-        binding?.bcode?.unbind()
-        super.onStop()
-    }
-
     override fun onDestroyView() {
         binding = null
         super.onDestroyView()
