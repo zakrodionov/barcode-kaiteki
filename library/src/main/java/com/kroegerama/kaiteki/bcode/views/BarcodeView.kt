@@ -1,12 +1,9 @@
 package com.kroegerama.kaiteki.bcode.views
 
 import android.content.Context
-import android.content.res.Resources
-import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Size
 import android.util.SizeF
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.camera.core.CameraSelector
@@ -39,7 +36,7 @@ class BarcodeView @JvmOverloads constructor(
 
     private val barcodeReader by lazy { MultiFormatReader() }
 
-    private val analyzer by lazy { BarcodeAnalyzer(this, barcodeReader) }
+    private val analyzer by lazy { BarcodeAnalyzer(this, barcodeReader, binding.customViewFinder) }
 
     private val resultDebouncer = Debouncer(500)
 
@@ -47,17 +44,11 @@ class BarcodeView @JvmOverloads constructor(
         keepScreenOn = true
 
         context.withStyledAttributes(attrs, Style.BarcodeView, defStyleAttr) {
-            binding.resultView.showResultPoints = getBoolean(Style.BarcodeView_showResultPoints, true)
-            binding.resultView.setResultPointColor(getColor(Style.BarcodeView_resultPointColor, Color.GREEN))
-            val defaultSize =
-                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8f, Resources.getSystem().displayMetrics)
-            binding.resultView.setPointSize(getDimension(Style.BarcodeView_resultPointSize, defaultSize))
             analyzer.inverted = getBoolean(Style.BarcodeView_barcodeInverted, false)
         }
     }
 
     override fun onResult(result: Result, imageWidth: Int, imageHeight: Int, imageRotation: Int) {
-        binding.resultView.setResult(result, imageWidth, imageHeight, imageRotation)
 
         val d = resultDebouncer {
             listener?.onBarcodeResult(result)
@@ -68,9 +59,7 @@ class BarcodeView @JvmOverloads constructor(
         }
     }
 
-    override fun onNoResult() {
-        binding.resultView.clear()
-    }
+    override fun onNoResult() = Unit
 
     fun setBarcodeResultListener(listener: BarcodeResultListener) {
         this.listener = listener
@@ -102,7 +91,6 @@ class BarcodeView @JvmOverloads constructor(
     }
 
     fun unbind() {
-        binding.resultView.clear()
         listener = null
         cameraProvider.unbindAll()
     }

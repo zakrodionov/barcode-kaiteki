@@ -3,9 +3,8 @@ package com.kroegerama.kaiteki.bcode
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.content.res.TypedArray
+import android.content.res.Resources
 import android.os.Build
-import android.util.AttributeSet
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 
@@ -42,3 +41,5 @@ internal class Debouncer(
         null
     }
 }
+
+val Int.dpToPxF get() = (this * Resources.getSystem().displayMetrics.density)

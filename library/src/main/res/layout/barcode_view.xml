@@ -12,8 +12,8 @@
         android:layout_height="match_parent"
         app:implementationMode="compatible" />
 
-    <com.kroegerama.kaiteki.bcode.views.ResultPointView
-        android:id="@+id/resultView"
+    <com.kroegerama.kaiteki.bcode.views.CustomViewFinder
+        android:id="@+id/customViewFinder"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </merge>
