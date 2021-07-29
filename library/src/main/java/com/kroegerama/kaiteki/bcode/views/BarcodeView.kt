@@ -3,13 +3,13 @@ package com.kroegerama.kaiteki.bcode.views
 import android.content.Context
 import android.util.AttributeSet
 import android.util.Size
-import android.util.SizeF
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView.StreamState
 import androidx.core.content.withStyledAttributes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -31,11 +31,11 @@ class BarcodeView @JvmOverloads constructor(
     private lateinit var executor: ExecutorService
     private var lifecycleOwner: LifecycleOwner? = null
 
+    var previewIsReadyListener: () -> Unit = {}
+
     private val binding = BarcodeViewBinding.inflate(LayoutInflater.from(context), this)
 
     private val cameraProvider by lazy { ProcessCameraProvider.getInstance(context).get() }
-
-    private var bufferSize = SizeF(0f, 0f)
 
     private var listener: BarcodeResultListener? = null
 
@@ -106,13 +106,17 @@ class BarcodeView @JvmOverloads constructor(
                     owner.lifecycle.removeObserver(this)
                 }
             })
+
+            binding.previewView.previewStreamState.observe(owner) {
+                if (it is StreamState) {
+                    previewIsReadyListener.invoke()
+                }
+            }
         }
     }
 
     fun setFormats(formats: List<BarcodeFormat>) = barcodeReader.setHints(
-        mapOf(
-            DecodeHintType.POSSIBLE_FORMATS to formats
-        )
+        mapOf(DecodeHintType.POSSIBLE_FORMATS to formats)
     )
 }
 
