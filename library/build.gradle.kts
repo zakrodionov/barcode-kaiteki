@@ -36,17 +36,17 @@ android {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.21")
 
-    implementation("androidx.core:core-ktx:1.3.2")
-    implementation("androidx.appcompat:appcompat:1.2.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
-    implementation("com.google.android.material:material:1.3.0")
+    implementation("androidx.core:core-ktx:1.6.0")
+    implementation("androidx.appcompat:appcompat:1.3.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
+    implementation("com.google.android.material:material:1.4.0")
 
-    api("androidx.camera:camera-core:1.0.0")
-    api("androidx.camera:camera-lifecycle:1.0.0")
-    api("androidx.camera:camera-camera2:1.0.0")
-    api("androidx.camera:camera-view:1.0.0-alpha24")
+    api("androidx.camera:camera-core:1.0.1")
+    api("androidx.camera:camera-lifecycle:1.0.1")
+    api("androidx.camera:camera-camera2:1.0.1")
+    api("androidx.camera:camera-view:1.0.0-alpha27")
 
     api("com.google.zxing:core:3.4.1")
 }
