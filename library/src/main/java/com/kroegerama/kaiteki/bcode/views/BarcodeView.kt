@@ -9,7 +9,6 @@ import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView.StreamState
 import androidx.core.content.withStyledAttributes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
@@ -30,8 +29,6 @@ class BarcodeView @JvmOverloads constructor(
 
     private lateinit var executor: ExecutorService
     private var lifecycleOwner: LifecycleOwner? = null
-
-    var previewIsReadyListener: () -> Unit = {}
 
     val binding = BarcodeViewBinding.inflate(LayoutInflater.from(context), this)
 
@@ -82,18 +79,23 @@ class BarcodeView @JvmOverloads constructor(
             lifecycleOwner = owner
 
             executor = Executors.newSingleThreadExecutor()
+
             val preview = Preview.Builder()
                 .build()
             val cameraSelector = CameraSelector.Builder()
                 .requireLensFacing(CameraSelector.LENS_FACING_BACK)
                 .build()
 
-            val analysis = ImageAnalysis.Builder().apply {
-                setTargetResolution(Size(640, 480))
-                setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            }.build().apply {
-                setAnalyzer(executor, analyzer)
-            }
+            val analysis = ImageAnalysis.Builder()
+                .apply {
+                    setTargetResolution(Size(640, 480))
+                    setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                }
+                .build()
+                .apply {
+                    setAnalyzer(executor, analyzer)
+                }
+
             cameraProvider.unbindAll()
             preview.setSurfaceProvider(binding.previewView.surfaceProvider)
             cameraProvider.bindToLifecycle(owner, cameraSelector, preview, analysis)
@@ -106,12 +108,6 @@ class BarcodeView @JvmOverloads constructor(
                     owner.lifecycle.removeObserver(this)
                 }
             })
-
-            binding.previewView.previewStreamState.observe(owner) {
-                if (it is StreamState) {
-                    previewIsReadyListener.invoke()
-                }
-            }
         }
     }
 
